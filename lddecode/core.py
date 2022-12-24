@@ -1016,7 +1016,11 @@ class DemodCache:
         self.blocks = {}
 
         if platform.system() == "Darwin":
-            set_start_method("fork")
+            try:
+                set_start_method("fork")
+            except RuntimeError:
+                pass
+
 
         # Workaround to make it work on windows.
         # Using Process gives a "io.BufferedReader can't be pickled error".
@@ -1048,13 +1052,14 @@ class DemodCache:
 
     def end(self):
         # stop workers
-        for i in self.threads:
-            self.q_in.put(None)
+        if not platform.system() == "Darwin":
+            for i in self.threads:
+                self.q_in.put(None)
 
-        for t in self.threads:
-            t.join()
+            for t in self.threads:
+                t.join()
 
-        self.q_out.put(None)
+            self.q_out.put(None)
 
     def __del__(self):
         self.end()

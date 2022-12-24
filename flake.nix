@@ -30,7 +30,7 @@
           '';
           postPatch = ''
             substituteInPlace samplerate/lowlevel.py \
-              --replace "_find_library('samplerate')" '"${pkgs.libsamplerate.out}/lib/libsamplerate.${if stdenv.isDarwin then "dylib" else "so"}"'
+              --replace "_find_library('samplerate')" '"${pkgs.libsamplerate.out}/lib/libsamplerate.${if pkgs.stdenv.isDarwin then "dylib" else "so"}"'
           '';
         };
 
@@ -42,7 +42,8 @@
 
           nativeBuildInputs = [ cmake pkg-config ];
           buildInputs = [ 
-            qt6.full
+            qt6.qtbase
+            qt6.wrapQtAppsHook
             fftw
             ffmpeg-full
           ];
@@ -78,11 +79,6 @@
               done
             '';
           };
-
-        # pythonAppEnv = mach.mkPython {
-        #   python = pythonVersion;
-        #   requirements = builtins.readFile ./requirements.txt;
-        # };
       in
       rec
       {
@@ -90,19 +86,6 @@
           inherit vhs-decode ld-decode;
           default = packages.vhs-decode;
         };
-
-        # apps.default = {
-        #   type = "app";
-        #   program = "${packages.pythonPkg}/bin/main";
-        # };
-
-        # devShells.default = pkgs.mkShellNoCC {
-        #   packages = [ pythonAppEnv ];
-
-        #   shellHook = ''
-        #     export PYTHONPATH="${pythonAppEnv}/bin/python"
-        #   '';
-        # };
       }
     );
 }
